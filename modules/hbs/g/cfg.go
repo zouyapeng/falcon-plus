@@ -27,14 +27,15 @@ type HttpConfig struct {
 }
 
 type GlobalConfig struct {
-	Debug     bool        `json:"debug"`
-	Hosts     string      `json:"hosts"`
-	Database  string      `json:"database"`
-	MaxConns  int         `json:"maxConns"`
-	MaxIdle   int         `json:"maxIdle"`
-	Listen    string      `json:"listen"`
-	Trustable []string    `json:"trustable"`
-	Http      *HttpConfig `json:"http"`
+	Debug       bool              `json:"debug"`
+	Hosts       string            `json:"hosts"`
+	IWSaaSRoles map[string]string `json:"iwsaas_roles"`
+	Database    string            `json:"database"`
+	MaxConns    int               `json:"maxConns"`
+	MaxIdle     int               `json:"maxIdle"`
+	Listen      string            `json:"listen"`
+	Trustable   []string          `json:"trustable"`
+	Http        *HttpConfig       `json:"http"`
 }
 
 var (

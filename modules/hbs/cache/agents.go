@@ -23,19 +23,16 @@ import (
 	"time"
 
 	"github.com/open-falcon/falcon-plus/common/model"
-	"github.com/open-falcon/falcon-plus/common/utils"
 	"github.com/open-falcon/falcon-plus/modules/hbs/db"
+	"github.com/open-falcon/falcon-plus/modules/hbs/g"
+	"strings"
+	"fmt"
 )
 
 type SafeAgents struct {
 	sync.RWMutex
 	M map[string]*model.AgentUpdateInfo
 }
-
-var Iwsaas_Roles = []string{"AdminPortal", "Alert", "CEAgent", "ForwardProxy", "LogWriter", "LVS", "Manage", "Misc",
-	"ScannerDy", "SCOAgent", "SupportPortal", "VpcLdap", "VpnGw", "Cassandra", "DevMgmt", "DDReceiver", "DDHandler",
-	"certmgmt", "logquery", "logmerge", "logdump", "logdispatch", "logreceiver", "ScannerDy4v20", "PatchMgmt",
-	"msgcenter", "scannerDebug", "skynetagent", "pacst", "falcon"}
 
 var Agents = NewSafeAgents()
 
@@ -62,11 +59,12 @@ func (this *SafeAgents) Put(req *model.AgentReportRequest) {
 		HostMap.Init()
 
 		if hid, exists := HostMap.GetID(req.Hostname);exists{
-			if utils.IsInSlice(req.Role, Iwsaas_Roles){
+			if groupName, exists := g.Config().IWSaaSRoles[strings.ToLower(req.Role)]; exists{
 				if _, exists := HostGroupsMap.GetGroupIds(hid); !exists{
 					var newGid int
 					if newGid, exists = GroupsMap.GetID(req.Role);!exists{
-						db.AddGroup(req.Role)
+						newGroupName := fmt.Sprintf("%s.%s", req.ProductVersion, groupName)
+						db.AddGroup(newGroupName)
 						GroupsMap.Init()
 						newGid, _ = GroupsMap.GetID(req.Role)
 					}
