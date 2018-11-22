@@ -21,12 +21,39 @@ import (
 	"log"
 )
 
+func AddGroup(grpName string){
+	sql := ""
+
+	sql = fmt.Sprintf("insert into grp(grp_name) values ('%s')", grpName)
+
+	_, err := DB.Exec(sql)
+	if err != nil {
+		log.Println("exec", sql, "fail", err)
+	}
+}
+
+func UpdateAgentToGroup(hid int, gid int){
+	sql := ""
+
+	sql = fmt.Sprintf("insert into grp_host(grp_id, host_id) values ('%d', '%d')", hid, gid)
+
+	_, err := DB.Exec(sql)
+	if err != nil {
+		log.Println("exec", sql, "fail", err)
+	}
+}
+
 func UpdateAgent(agentInfo *model.AgentUpdateInfo) {
 	sql := ""
 	if g.Config().Hosts == "" {
 		sql = fmt.Sprintf(
-			"insert into host(hostname, ip, agent_version, plugin_version) values ('%s', '%s', '%s', '%s') on duplicate key update ip='%s', agent_version='%s', plugin_version='%s'",
+			"insert into host(hostname, instance_id, region, role, product_version, environment, ip, agent_version, plugin_version) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') on duplicate key update ip='%s', agent_version='%s', plugin_version='%s'",
 			agentInfo.ReportRequest.Hostname,
+			agentInfo.ReportRequest.InstanceID,
+			agentInfo.ReportRequest.Region,
+			agentInfo.ReportRequest.Role,
+			agentInfo.ReportRequest.ProductVersion,
+			agentInfo.ReportRequest.Environment,
 			agentInfo.ReportRequest.IP,
 			agentInfo.ReportRequest.AgentVersion,
 			agentInfo.ReportRequest.PluginVersion,
@@ -37,8 +64,13 @@ func UpdateAgent(agentInfo *model.AgentUpdateInfo) {
 	} else {
 		// sync, just update
 		sql = fmt.Sprintf(
-			"update host set ip='%s', agent_version='%s', plugin_version='%s' where hostname='%s'",
+			"update host set ip='%s', instance_id=%s, region=%s, role=%s, product_version=%s, env=%s, agent_version='%s', plugin_version='%s' where hostname='%s'",
 			agentInfo.ReportRequest.IP,
+			agentInfo.ReportRequest.InstanceID,
+			agentInfo.ReportRequest.Region,
+			agentInfo.ReportRequest.Role,
+			agentInfo.ReportRequest.ProductVersion,
+			agentInfo.ReportRequest.Environment,
 			agentInfo.ReportRequest.AgentVersion,
 			agentInfo.ReportRequest.PluginVersion,
 			agentInfo.ReportRequest.Hostname,

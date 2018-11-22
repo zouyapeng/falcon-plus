@@ -21,6 +21,10 @@ import (
 	"sync"
 
 	"github.com/toolkits/file"
+	"io/ioutil"
+	"net/http"
+	"strings"
+	"time"
 )
 
 type PluginConfig struct {
@@ -56,16 +60,21 @@ type CollectorConfig struct {
 }
 
 type GlobalConfig struct {
-	Debug         bool              `json:"debug"`
-	Hostname      string            `json:"hostname"`
-	IP            string            `json:"ip"`
-	Plugin        *PluginConfig     `json:"plugin"`
-	Heartbeat     *HeartbeatConfig  `json:"heartbeat"`
-	Transfer      *TransferConfig   `json:"transfer"`
-	Http          *HttpConfig       `json:"http"`
-	Collector     *CollectorConfig  `json:"collector"`
-	DefaultTags   map[string]string `json:"default_tags"`
-	IgnoreMetrics map[string]bool   `json:"ignore"`
+	Debug          bool              `json:"debug"`
+	Hostname       string            `json:"hostname"`
+	IP             string            `json:"ip"`
+	InstanceID     string            `json:"instance_id"`
+	Region         string            `json:"region"`
+	Role           string            `json:"role"`
+	ProductVersion string            `json:"product_version"`
+	Environment    string            `json:"environment"`
+	Plugin         *PluginConfig     `json:"plugin"`
+	Heartbeat      *HeartbeatConfig  `json:"heartbeat"`
+	Transfer       *TransferConfig   `json:"transfer"`
+	Http           *HttpConfig       `json:"http"`
+	Collector      *CollectorConfig  `json:"collector"`
+	DefaultTags    map[string]string `json:"default_tags"`
+	IgnoreMetrics  map[string]bool   `json:"ignore"`
 }
 
 var (
@@ -95,7 +104,119 @@ func Hostname() (string, error) {
 	if err != nil {
 		log.Println("ERROR: os.Hostname() fail", err)
 	}
+	hostname = strings.Replace(hostname, ".", "-", -1)
 	return hostname, err
+}
+
+func InstanceID() string {
+	instanceID := Config().InstanceID
+	if instanceID != "" {
+		return instanceID
+	}
+
+	httpClient := &http.Client{}
+	httpClient.Timeout = 3 * time.Second
+
+	resp, err := httpClient.Get("http://169.254.169.254/latest/meta-data/instance-id")
+	if err != nil {
+		log.Println("ERROR: Get instance_id from AWS fail", err)
+		return ""
+	}
+	defer resp.Body.Close()
+
+	Response, _ := ioutil.ReadAll(resp.Body)
+	instanceID = string(Response)
+	return instanceID
+}
+
+func Region() string {
+	region := Config().Region
+	if region != "" {
+		return region
+	}
+
+	httpClient := &http.Client{}
+	httpClient.Timeout = 3 * time.Second
+
+	resp, err := httpClient.Get("http://169.254.169.254/latest/meta-data/placement/availability-zone")
+	if err != nil {
+		log.Println("ERROR: Get region from AWS fail", err)
+		return ""
+	}
+
+	defer resp.Body.Close()
+
+	Response, _ := ioutil.ReadAll(resp.Body)
+	region = string(Response)
+	region = region[:len(region)-1]
+
+	return region
+}
+
+func Role() string {
+	role := Config().Role
+	if role != "" {
+		return role
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return ""
+	}
+	hostnameSplit := strings.Split(hostname, "-")
+
+	if len(hostnameSplit) == 7 &&
+		(hostnameSplit[2] == "20" || hostnameSplit[2] == "30") &&
+		(hostnameSplit[5] == "ops" || hostnameSplit[5] == "pro") {
+		role = hostnameSplit[0]
+		return role
+	}
+
+	return ""
+}
+
+func ProductVersion() string {
+	productVersion := Config().ProductVersion
+	if productVersion != "" {
+		return productVersion
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return ""
+	}
+	hostnameSplit := strings.Split(hostname, "-")
+
+	if len(hostnameSplit) == 7 &&
+		(hostnameSplit[2] == "20" || hostnameSplit[2] == "30") &&
+		(hostnameSplit[5] == "ops" || hostnameSplit[5] == "pro") {
+		productVersion = hostnameSplit[2]
+		return productVersion
+	}
+
+	return ""
+}
+
+func Environment() string {
+	environment := Config().Environment
+	if environment != "" {
+		return environment
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return ""
+	}
+	hostnameSplit := strings.Split(hostname, "-")
+
+	if len(hostnameSplit) == 7 &&
+		(hostnameSplit[2] == "20" || hostnameSplit[2] == "30") &&
+		(hostnameSplit[5] == "ops" || hostnameSplit[5] == "pro") {
+		environment = hostnameSplit[5]
+		return environment
+	}
+
+	return ""
 }
 
 func IP() string {

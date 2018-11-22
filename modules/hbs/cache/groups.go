@@ -25,7 +25,13 @@ type SafeHostGroupsMap struct {
 	M map[int][]int
 }
 
+type SafeGroupsMap struct {
+	sync.RWMutex
+	M map[string]int
+}
+
 var HostGroupsMap = &SafeHostGroupsMap{M: make(map[int][]int)}
+var GroupsMap = &SafeGroupsMap{M: make(map[string]int)}
 
 func (this *SafeHostGroupsMap) GetGroupIds(hid int) ([]int, bool) {
 	this.RLock()
@@ -34,8 +40,27 @@ func (this *SafeHostGroupsMap) GetGroupIds(hid int) ([]int, bool) {
 	return gids, exists
 }
 
+
 func (this *SafeHostGroupsMap) Init() {
 	m, err := db.QueryHostGroups()
+	if err != nil {
+		return
+	}
+
+	this.Lock()
+	defer this.Unlock()
+	this.M = m
+}
+
+func (this *SafeGroupsMap) GetID(grpName string) (int, bool) {
+	this.RLock()
+	defer this.RUnlock()
+	id, exists := this.M[grpName]
+	return id, exists
+}
+
+func (this *SafeGroupsMap) Init() {
+	m, err := db.QueryGroups()
 	if err != nil {
 		return
 	}

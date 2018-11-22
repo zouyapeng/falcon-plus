@@ -28,6 +28,18 @@ func ReportAgentStatus() {
 	}
 }
 
+type AgentReportRequest struct {
+	Hostname       string
+	IP             string
+	InstanceID     string
+	Region         string
+	Role           string
+	ProductVersion string
+	Env            string
+	AgentVersion   string
+	PluginVersion  string
+}
+
 func reportAgentStatus(interval time.Duration) {
 	for {
 		hostname, err := g.Hostname()
@@ -36,10 +48,15 @@ func reportAgentStatus(interval time.Duration) {
 		}
 
 		req := model.AgentReportRequest{
-			Hostname:      hostname,
-			IP:            g.IP(),
-			AgentVersion:  g.VERSION,
-			PluginVersion: g.GetCurrPluginVersion(),
+			Hostname:       hostname,
+			IP:             g.IP(),
+			InstanceID:     g.InstanceID(),
+			Region:         g.Region(),
+			Role:           g.Role(),
+			ProductVersion: g.ProductVersion(),
+			Environment:    g.Environment(),
+			AgentVersion:   g.VERSION,
+			PluginVersion:  g.GetCurrPluginVersion(),
 		}
 
 		var resp model.SimpleRpcResponse

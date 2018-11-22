@@ -18,6 +18,35 @@ import (
 	"log"
 )
 
+func QueryGroups() (map[string]int, error) {
+	m := make(map[string]int)
+
+	sql := "select id, grp_name from grp"
+	rows, err := DB.Query(sql)
+	if err != nil {
+		log.Println("ERROR:", err)
+		return m, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			id       int
+			grp_name string
+		)
+
+		err = rows.Scan(&id, &grp_name)
+		if err != nil {
+			log.Println("ERROR:", err)
+			continue
+		}
+
+		m[grp_name] = id
+	}
+
+	return m, nil
+}
+
 func QueryHostGroups() (map[int][]int, error) {
 	m := make(map[int][]int)
 

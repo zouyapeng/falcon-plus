@@ -31,22 +31,25 @@ func Init() {
 	log.Println("#3 HostGroupsMap...")
 	HostGroupsMap.Init()
 
-	log.Println("#4 HostMap...")
+	log.Println("#4 GroupsMap...")
+	GroupsMap.Init()
+
+	log.Println("#5 HostMap...")
 	HostMap.Init()
 
-	log.Println("#5 TemplateCache...")
+	log.Println("#6 TemplateCache...")
 	TemplateCache.Init()
 
-	log.Println("#6 Strategies...")
+	log.Println("#7 Strategies...")
 	Strategies.Init(TemplateCache.GetMap())
 
-	log.Println("#7 HostTemplateIds...")
+	log.Println("#8 HostTemplateIds...")
 	HostTemplateIds.Init()
 
-	log.Println("#8 ExpressionCache...")
+	log.Println("#9 ExpressionCache...")
 	ExpressionCache.Init()
 
-	log.Println("#9 MonitoredHosts...")
+	log.Println("#10 MonitoredHosts...")
 	MonitoredHosts.Init()
 
 	log.Println("cache done")

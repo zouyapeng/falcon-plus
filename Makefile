@@ -4,6 +4,8 @@ PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 GOFILES := $(shell find . -name "*.go" -type f -not -path "./vendor/*")
 GOFMT ?= gofmt "-s"
 VERSION := $(shell cat VERSION)
+GOOS = linux
+GOARCH = amd64
 
 all: $(CMD) $(TARGET)
 
@@ -44,11 +46,11 @@ fmt-check:
 	fi;
 
 $(CMD):
-	go build -o bin/$@/falcon-$@ ./modules/$@
+	CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${GOARCH} go build -o bin/$@/falcon-$@ ./modules/$@
 
 .PHONY: $(TARGET)
 $(TARGET): $(GOFILES)
-	go build -ldflags "-X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" -o open-falcon
+	CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags "-X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" -o open-falcon
 
 checkbin: bin/ config/ open-falcon
 

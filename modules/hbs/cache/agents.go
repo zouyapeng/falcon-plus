@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/open-falcon/falcon-plus/common/model"
+	"github.com/open-falcon/falcon-plus/common/utils"
 	"github.com/open-falcon/falcon-plus/modules/hbs/db"
 )
 
@@ -30,6 +31,11 @@ type SafeAgents struct {
 	sync.RWMutex
 	M map[string]*model.AgentUpdateInfo
 }
+
+var Iwsaas_Roles = []string{"AdminPortal", "Alert", "CEAgent", "ForwardProxy", "LogWriter", "LVS", "Manage", "Misc",
+	"ScannerDy", "SCOAgent", "SupportPortal", "VpcLdap", "VpnGw", "Cassandra", "DevMgmt", "DDReceiver", "DDHandler",
+	"certmgmt", "logquery", "logmerge", "logdump", "logdispatch", "logreceiver", "ScannerDy4v20", "PatchMgmt",
+	"msgcenter", "scannerDebug", "skynetagent", "pacst", "falcon"}
 
 var Agents = NewSafeAgents()
 
@@ -46,9 +52,29 @@ func (this *SafeAgents) Put(req *model.AgentReportRequest) {
 	if agentInfo, exists := this.Get(req.Hostname); !exists ||
 		agentInfo.ReportRequest.AgentVersion != req.AgentVersion ||
 		agentInfo.ReportRequest.IP != req.IP ||
-		agentInfo.ReportRequest.PluginVersion != req.PluginVersion {
-
+		agentInfo.ReportRequest.PluginVersion != req.PluginVersion ||
+		agentInfo.ReportRequest.Region != req.Region ||
+		agentInfo.ReportRequest.InstanceID != req.InstanceID ||
+		agentInfo.ReportRequest.Environment != req.Environment ||
+		agentInfo.ReportRequest.Role != req.Role ||
+		agentInfo.ReportRequest.ProductVersion != req.ProductVersion {
 		db.UpdateAgent(val)
+		HostMap.Init()
+
+		if hid, exists := HostMap.GetID(req.Hostname);exists{
+			if utils.IsInSlice(req.Role, Iwsaas_Roles){
+				if _, exists := HostGroupsMap.GetGroupIds(hid); !exists{
+					var newGid int
+					if newGid, exists = GroupsMap.GetID(req.Role);!exists{
+						db.AddGroup(req.Role)
+						GroupsMap.Init()
+						newGid, _ = GroupsMap.GetID(req.Role)
+					}
+					db.UpdateAgentToGroup(hid, newGid)
+					HostGroupsMap.Init()
+				}
+			}
+		}
 	}
 
 	// 更新hbs 时间

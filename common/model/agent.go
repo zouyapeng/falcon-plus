@@ -19,10 +19,15 @@ import (
 )
 
 type AgentReportRequest struct {
-	Hostname      string
-	IP            string
-	AgentVersion  string
-	PluginVersion string
+	Hostname       string
+	IP             string
+	InstanceID     string
+	Region         string
+	Role           string
+	ProductVersion string
+	Environment    string
+	AgentVersion   string
+	PluginVersion  string
 }
 
 func (this *AgentReportRequest) String() string {

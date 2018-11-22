@@ -2,6 +2,11 @@
     "debug": true,
     "hostname": "",
     "ip": "",
+    "instance_id": "",
+    "region": "",
+    "role": "",
+    "product_version": "",
+    "environment": "",
     "plugin": {
         "enabled": false,
         "dir": "./plugin",
