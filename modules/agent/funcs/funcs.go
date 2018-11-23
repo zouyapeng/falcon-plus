@@ -41,6 +41,7 @@ func BuildMappers() {
 				IOStatsMetrics,
 				NetstatMetrics,
 				ProcMetrics,
+				ProcResourceMetrics,
 				UdpMetrics,
 			},
 			Interval: interval,

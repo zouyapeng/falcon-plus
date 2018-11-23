@@ -32,4 +32,8 @@ const (
 	NET_PORT_LISTEN  = "net.port.listen"
 	DU_BS            = "du.bs"
 	PROC_NUM         = "proc.num"
+	PROC_RESOURCES   = "process.resource"
+	PROC_CPU         = "process.cpu.busy"
+	PROC_MEM         = "proc.mem.percent"
+	PROC_FD          = "proc.fd"
 )

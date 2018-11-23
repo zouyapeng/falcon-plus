@@ -41,7 +41,8 @@ func syncBuiltinMetrics() {
 
 		var ports = []int64{}
 		var paths = []string{}
-		var procs = make(map[string]map[int]string)
+		var procsNum = make(map[string]map[int]string)
+		var procsResource = make(map[string]map[int]string)
 		var urls = make(map[string]string)
 
 		hostname, err := g.Hostname()
@@ -132,13 +133,30 @@ func syncBuiltinMetrics() {
 					}
 				}
 
-				procs[metric.Tags] = tmpMap
+				procsNum[metric.Tags] = tmpMap
+			}
+
+			if metric.Metric == g.PROC_RESOURCES {
+				arr := strings.Split(metric.Tags, ",")
+
+				tmpMap := make(map[int]string)
+
+				for i := 0; i < len(arr); i++ {
+					if strings.HasPrefix(arr[i], "name=") {
+						tmpMap[1] = strings.TrimSpace(arr[i][5:])
+					} else if strings.HasPrefix(arr[i], "cmdline=") {
+						tmpMap[2] = strings.TrimSpace(arr[i][8:])
+					}
+				}
+
+				procsResource[metric.Tags] = tmpMap
 			}
 		}
 
 		g.SetReportUrls(urls)
 		g.SetReportPorts(ports)
-		g.SetReportProcs(procs)
+		g.SetReportProcs(procsNum)
+		g.SetReportProcsResource(procsResource)
 		g.SetDuPaths(paths)
 
 	}

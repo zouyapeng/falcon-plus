@@ -167,6 +167,9 @@ var (
 	// e.g. 'cmdline=xx'=>{2=>xx}
 	reportProcs     map[string]map[int]string
 	reportProcsLock = new(sync.RWMutex)
+
+	reportProcsResource     map[string]map[int]string
+	reportProcsResourceLock = new(sync.RWMutex)
 )
 
 func ReportProcs() map[string]map[int]string {
@@ -179,6 +182,18 @@ func SetReportProcs(procs map[string]map[int]string) {
 	reportProcsLock.Lock()
 	defer reportProcsLock.Unlock()
 	reportProcs = procs
+}
+
+func ReportProcsResource() map[string]map[int]string {
+	reportProcsResourceLock.RLock()
+	defer reportProcsResourceLock.RUnlock()
+	return reportProcsResource
+}
+
+func SetReportProcsResource(procs map[string]map[int]string) {
+	reportProcsResourceLock.Lock()
+	defer reportProcsResourceLock.Unlock()
+	reportProcsResource = procs
 }
 
 var (
