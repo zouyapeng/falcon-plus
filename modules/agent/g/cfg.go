@@ -172,7 +172,7 @@ func Role() string {
 		return role
 	}
 
-	return ""
+	return "default"
 }
 
 func ProductVersion() string {

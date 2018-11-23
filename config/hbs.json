@@ -33,7 +33,8 @@
         "scannerdebug": "ScannerDebug",
         "skynetagent": "SkynetAgent",
         "pacst": "PacSt",
-        "falconserver": "FalconServer"
+        "falconserver": "FalconServer",
+        "default": "Common"
     },
     "maxConns": 20,
     "maxIdle": 15,
