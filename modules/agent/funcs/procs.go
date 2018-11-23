@@ -15,19 +15,19 @@
 package funcs
 
 import (
+	"fmt"
 	"github.com/open-falcon/falcon-plus/common/model"
 	"github.com/open-falcon/falcon-plus/modules/agent/g"
+	"github.com/struCoder/pidusage"
+	"github.com/toolkits/file"
 	"github.com/toolkits/nux"
+	"io/ioutil"
 	"log"
 	"strings"
-	"io/ioutil"
-	"github.com/toolkits/file"
-	"fmt"
-	"github.com/struCoder/pidusage"
 )
 
 type Resource struct {
-	Fd int
+	Fd       int
 	MemUsage float64
 	CpuUsage float64
 }
@@ -61,7 +61,6 @@ func ProcMetrics() (L []*model.MetricValue) {
 	return
 }
 
-
 func ProcResourceMetrics() (L []*model.MetricValue) {
 	reportProcs := g.ReportProcsResource()
 	sz := len(reportProcs)
@@ -90,11 +89,11 @@ func ProcResourceMetrics() (L []*model.MetricValue) {
 		var resourceAllOfOne *Resource
 		for index, ps := range findPss {
 			resource, err := collectProcessResources(ps.Pid)
-			if err != nil{
+			if err != nil {
 				continue
 			}
 
-			if index == 0{
+			if index == 0 {
 				resourceAllOfOne = resource
 			} else {
 				resourceAllOfOne.Fd += resource.Fd
@@ -103,19 +102,18 @@ func ProcResourceMetrics() (L []*model.MetricValue) {
 			}
 		}
 
-		L = append(L, GaugeValue(g.PROC_CPU, resourceAllOfOne.CpuUsage / float64(cpuNum), tags))
-		L = append(L, GaugeValue(g.PROC_MEM, resourceAllOfOne.MemUsage/ float64(memInfo.MemTotal), tags))
-		L = append(L, GaugeValue(g.PROC_FD, resourceAllOfOne.Fd, tags))
+		L = append(L, GaugeValue("process.cpu.busy", resourceAllOfOne.CpuUsage/float64(cpuNum), tags))
+		L = append(L, GaugeValue("process.mem.percent", resourceAllOfOne.MemUsage/float64(memInfo.MemTotal), tags))
+		L = append(L, GaugeValue("process.fd", resourceAllOfOne.Fd, tags))
 	}
 
 	return
 }
 
-
-func collectProcessResources(pid int) (resource *Resource,err error){
+func collectProcessResources(pid int) (*Resource, error) {
 	FdFile := fmt.Sprintf("/proc/%d/fd", pid)
 	if !file.IsExist(FdFile) {
-		return
+		return nil, fmt.Errorf("%s Is Not Exist", FdFile)
 	}
 	files, err := ioutil.ReadDir(FdFile)
 
@@ -123,8 +121,9 @@ func collectProcessResources(pid int) (resource *Resource,err error){
 		log.Fatal(err)
 	}
 
+	var resource Resource
 	resource.Fd = len(files) - 3
-	if resource.Fd < 0{
+	if resource.Fd < 0 {
 		resource.Fd = 0
 	}
 
@@ -132,9 +131,8 @@ func collectProcessResources(pid int) (resource *Resource,err error){
 	resource.MemUsage = sysInfo.Memory
 	resource.CpuUsage = sysInfo.CPU
 
-	return
+	return &resource, err
 }
-
 
 func is_a(p *nux.Proc, m map[int]string) bool {
 	// only one kv pair

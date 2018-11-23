@@ -32,10 +32,33 @@ func AddGroup(grpName string){
 	}
 }
 
+func AddTemplate(tplName string){
+	sql := ""
+
+	sql = fmt.Sprintf("insert into tpl(tpl_name) values ('%s')", tplName)
+
+	_, err := DB.Exec(sql)
+	if err != nil {
+		log.Println("exec", sql, "fail", err)
+	}
+}
+
+
 func UpdateAgentToGroup(hid int, gid int){
 	sql := ""
 
 	sql = fmt.Sprintf("insert into grp_host(grp_id, host_id) values ('%d', '%d')", hid, gid)
+
+	_, err := DB.Exec(sql)
+	if err != nil {
+		log.Println("exec", sql, "fail", err)
+	}
+}
+
+func UpdateTemplateToGroup(tid int, gid int){
+	sql := ""
+
+	sql = fmt.Sprintf("insert into grp_tpl(tpl_id, grp_id) values ('%d', '%d')", tid, gid)
 
 	_, err := DB.Exec(sql)
 	if err != nil {

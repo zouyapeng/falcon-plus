@@ -61,17 +61,25 @@ func (this *SafeAgents) Put(req *model.AgentReportRequest) {
 		if hid, exists := HostMap.GetID(req.Hostname);exists{
 			if groupName, exists := g.Config().IWSaaSRoles[strings.ToLower(req.Role)]; exists{
 				if _, exists := HostGroupsMap.GetGroupIds(hid); !exists{
-					var newGid int
-					if newGid, exists = GroupsMap.GetID(req.Role);!exists{
-						newGroupName := fmt.Sprintf("%s.%s", req.ProductVersion, groupName)
+					var newGid,newTid int
+					newGroupName := fmt.Sprintf("%s.%s", req.ProductVersion, groupName)
+					if newGid, exists = GroupsMap.GetID(newGroupName);!exists{
 						db.AddGroup(newGroupName)
 						GroupsMap.Init()
-						newGid, _ = GroupsMap.GetID(req.Role)
+						if newGid, exists = TemplateCache.GetID(newGroupName);!exists{
+							db.AddTemplate(newGroupName)
+							TemplateCache.Init()
+						}
+						newGid, _ = GroupsMap.GetID(newGroupName)
+						newTid, _ = TemplateCache.GetID(newGroupName)
 					}
 					db.UpdateAgentToGroup(hid, newGid)
+					db.UpdateTemplateToGroup(newTid, newGid)
+					HostTemplateIds.Init()
 					HostGroupsMap.Init()
 				}
 			}
+
 		}
 	}
 

@@ -75,7 +75,7 @@ CREATE TABLE tpl
   tpl_name    VARCHAR(255) NOT NULL DEFAULT '',
   parent_id   INT UNSIGNED NOT NULL DEFAULT 0,
   action_id   INT UNSIGNED NOT NULL DEFAULT 0,
-  create_user VARCHAR(64)  NOT NULL DEFAULT '',
+  create_user VARCHAR(64)  NOT NULL DEFAULT 'auto',
   create_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY idx_tpl_name (tpl_name),
@@ -132,7 +132,7 @@ DROP TABLE IF EXISTS grp_tpl;
 CREATE TABLE `grp_tpl` (
   `grp_id`    INT(10) UNSIGNED NOT NULL,
   `tpl_id`    INT(10) UNSIGNED NOT NULL,
-  `bind_user` VARCHAR(64)      NOT NULL DEFAULT '',
+  `bind_user` VARCHAR(64)      NOT NULL DEFAULT 'auto',
   KEY `idx_grp_tpl_grp_id` (`grp_id`),
   KEY `idx_grp_tpl_tpl_id` (`tpl_id`)
 )

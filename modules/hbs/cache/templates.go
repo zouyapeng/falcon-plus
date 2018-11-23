@@ -59,6 +59,19 @@ func (this *SafeTemplateCache) GetMap() map[int]*model.Template {
 	return this.M
 }
 
+func (this *SafeTemplateCache) GetID(tplName string) (id int, exists bool) {
+	this.RLock()
+	defer this.RUnlock()
+	for id, tpl := range this.M{
+		if tplName == tpl.Name{
+			return id, true
+		} else {
+			continue
+		}
+	}
+	return 0, false
+}
+
 func (this *SafeTemplateCache) Init() {
 	ts, err := db.QueryTemplates()
 	if err != nil {

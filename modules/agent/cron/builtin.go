@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 )
 
 func SyncBuiltinMetrics() {
@@ -73,8 +74,9 @@ func syncBuiltinMetrics() {
 		timestamp = resp.Timestamp
 		checksum = resp.Checksum
 
+		fmt.Println(resp.Metrics)
 		for _, metric := range resp.Metrics {
-
+			fmt.Println(metric)
 			if metric.Metric == g.URL_CHECK_HEALTH {
 				arr := strings.Split(metric.Tags, ",")
 				if len(arr) != 2 {
