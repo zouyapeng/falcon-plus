@@ -71,11 +71,5 @@ func BuildMappers() {
 			},
 			Interval: interval,
 		},
-		{
-			Fs: []func() []*model.MetricValue{
-				GpuMetrics,
-			},
-			Interval: interval,
-		},
 	}
 }

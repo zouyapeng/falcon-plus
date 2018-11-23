@@ -36,6 +36,14 @@ func configPushRoutes() {
 			return
 		}
 
+		if hostName, err := g.Hostname(); err == nil{
+			for index, metric := range metrics{
+				if hostName != metric.Endpoint{
+					metrics[index].Endpoint = hostName
+				}
+			}
+		}
+
 		g.SendToTransfer(metrics)
 		w.Write([]byte("success"))
 	})

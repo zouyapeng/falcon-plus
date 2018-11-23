@@ -46,11 +46,11 @@ fmt-check:
 	fi;
 
 $(CMD):
-	CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${GOARCH} go build -o bin/$@/falcon-$@ ./modules/$@
+	GOOS=${GOOS} GOARCH=${GOARCH} go build -o bin/$@/falcon-$@ ./modules/$@
 
 .PHONY: $(TARGET)
 $(TARGET): $(GOFILES)
-	CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags "-X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" -o open-falcon
+	GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags "-X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" -o open-falcon
 
 checkbin: bin/ config/ open-falcon
 
