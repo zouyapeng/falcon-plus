@@ -34,7 +34,7 @@
         "skynetagent": "SkynetAgent",
         "pacst": "PacSt",
         "falconserver": "FalconServer",
-        "default": "Common"
+        "default": "Default"
     },
     "maxConns": 20,
     "maxIdle": 15,

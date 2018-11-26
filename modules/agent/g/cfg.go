@@ -161,7 +161,7 @@ func Role() string {
 
 	hostname, err := os.Hostname()
 	if err != nil {
-		return ""
+		return "default"
 	}
 	hostnameSplit := strings.Split(hostname, "-")
 
@@ -183,7 +183,7 @@ func ProductVersion() string {
 
 	hostname, err := os.Hostname()
 	if err != nil {
-		return ""
+		return "30"
 	}
 	hostnameSplit := strings.Split(hostname, "-")
 
@@ -194,7 +194,7 @@ func ProductVersion() string {
 		return productVersion
 	}
 
-	return ""
+	return "30"
 }
 
 func Environment() string {
