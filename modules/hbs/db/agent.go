@@ -47,7 +47,7 @@ func AddTemplate(tplName string){
 func UpdateAgentToGroup(hid int, gid int){
 	sql := ""
 
-	sql = fmt.Sprintf("insert into grp_host(grp_id, host_id) values ('%d', '%d')", hid, gid)
+	sql = fmt.Sprintf("insert into grp_host(grp_id, host_id) values ('%d', '%d')", gid, hid)
 
 	_, err := DB.Exec(sql)
 	if err != nil {

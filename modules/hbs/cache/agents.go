@@ -70,9 +70,9 @@ func (this *SafeAgents) Put(req *model.AgentReportRequest) {
 							db.AddTemplate(newGroupName)
 							TemplateCache.Init()
 						}
-						newGid, _ = GroupsMap.GetID(newGroupName)
-						newTid, _ = TemplateCache.GetID(newGroupName)
 					}
+					newGid, _ = GroupsMap.GetID(newGroupName)
+					newTid, _ = TemplateCache.GetID(newGroupName)
 					db.UpdateAgentToGroup(hid, newGid)
 					db.UpdateTemplateToGroup(newTid, newGid)
 					HostTemplateIds.Init()
