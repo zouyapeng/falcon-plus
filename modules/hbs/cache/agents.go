@@ -40,6 +40,44 @@ func NewSafeAgents() *SafeAgents {
 	return &SafeAgents{M: make(map[string]*model.AgentUpdateInfo)}
 }
 
+func UpdateHostGroupTemplate(req *model.AgentReportRequest) {
+	if hid, exists := HostMap.GetID(req.Hostname);exists{
+		if groupName, exists := g.Config().IWSaaSRoles[strings.ToLower(req.Role)]; exists{
+			if _, exists := HostGroupsMap.GetGroupIds(hid); !exists{
+				var newGid, newTid, CommonTid int
+				newGroupName := fmt.Sprintf("%s.%s", req.ProductVersion, groupName)
+				if newGid, exists = GroupsMap.GetID(newGroupName);!exists{
+					db.AddGroup(newGroupName)
+					GroupsMap.Init()
+					if newGid, exists = TemplateCache.GetID(newGroupName);!exists{
+						commonTplName := fmt.Sprintf("%s.%s", req.ProductVersion, "Common")
+						if CommonTid, exists = TemplateCache.GetID(commonTplName);!exists{
+							//db.AddGroup(commonTplName)
+							db.AddTemplate(commonTplName, 0)
+							//GroupsMap.Init()
+
+							//newCommonGid, _ := GroupsMap.GetID(commonTplName)
+							newCommonTid, _ := TemplateCache.GetID(commonTplName)
+							CommonTid = newCommonTid
+
+							//db.UpdateTemplateToGroup(CommonTid, newCommonGid)
+						}
+
+						db.AddTemplate(newGroupName, CommonTid)
+						TemplateCache.Init()
+					}
+				}
+				newGid, _ = GroupsMap.GetID(newGroupName)
+				newTid, _ = TemplateCache.GetID(newGroupName)
+				db.UpdateAgentToGroup(hid, newGid)
+				db.UpdateTemplateToGroup(newTid, newGid)
+				HostTemplateIds.Init()
+				HostGroupsMap.Init()
+			}
+		}
+	}
+}
+
 func (this *SafeAgents) Put(req *model.AgentReportRequest) {
 	val := &model.AgentUpdateInfo{
 		LastUpdate:    time.Now().Unix(),
@@ -58,29 +96,7 @@ func (this *SafeAgents) Put(req *model.AgentReportRequest) {
 		db.UpdateAgent(val)
 		HostMap.Init()
 
-		if hid, exists := HostMap.GetID(req.Hostname);exists{
-			if groupName, exists := g.Config().IWSaaSRoles[strings.ToLower(req.Role)]; exists{
-				if _, exists := HostGroupsMap.GetGroupIds(hid); !exists{
-					var newGid,newTid int
-					newGroupName := fmt.Sprintf("%s.%s", req.ProductVersion, groupName)
-					if newGid, exists = GroupsMap.GetID(newGroupName);!exists{
-						db.AddGroup(newGroupName)
-						GroupsMap.Init()
-						if newGid, exists = TemplateCache.GetID(newGroupName);!exists{
-							db.AddTemplate(newGroupName)
-							TemplateCache.Init()
-						}
-					}
-					newGid, _ = GroupsMap.GetID(newGroupName)
-					newTid, _ = TemplateCache.GetID(newGroupName)
-					db.UpdateAgentToGroup(hid, newGid)
-					db.UpdateTemplateToGroup(newTid, newGid)
-					HostTemplateIds.Init()
-					HostGroupsMap.Init()
-				}
-			}
-
-		}
+		UpdateHostGroupTemplate(req)
 	}
 
 	// 更新hbs 时间

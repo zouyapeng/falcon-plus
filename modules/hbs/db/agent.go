@@ -32,10 +32,10 @@ func AddGroup(grpName string){
 	}
 }
 
-func AddTemplate(tplName string){
+func AddTemplate(tplName string, commonTplID int){
 	sql := ""
 
-	sql = fmt.Sprintf("insert into tpl(tpl_name) values ('%s')", tplName)
+	sql = fmt.Sprintf("insert into tpl(tpl_name, parent_id) values ('%s' %d)", tplName, commonTplID)
 
 	_, err := DB.Exec(sql)
 	if err != nil {
