@@ -71,5 +71,12 @@ func BuildMappers() {
 			},
 			Interval: interval,
 		},
+		{
+			Fs: []func() []*model.MetricValue{
+				IWSaaSBootstrapErrorMetrics,
+				IWSaaSPatchHistoryMetrics,
+			},
+			Interval: interval,
+		},
 	}
 }
