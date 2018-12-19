@@ -18,6 +18,15 @@ import (
 	"time"
 )
 
+func UnixTsFormatWithTZ(ts int64, tz string) string{
+	loc, _ := time.LoadLocation(tz)
+	return time.Unix(ts, 0).In(loc).Format("2006-01-02 15:04:05")
+}
+
 func UnixTsFormat(ts int64) string {
 	return time.Unix(ts, 0).Format("2006-01-02 15:04:05")
+}
+
+func UnixTsFormatUTC(ts int64) string {
+	return time.Unix(ts, 0).UTC().Format("2006-01-02 15:04:05")
 }
