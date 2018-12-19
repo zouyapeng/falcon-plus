@@ -85,8 +85,11 @@ func ProcResourceMetrics() (L []*model.MetricValue) {
 				findPss = append(findPss, ps[i])
 			}
 		}
+		if len(findPss) == 0{
+			continue
+		}
 
-		var resourceAllOfOne *Resource
+		var resourceAllOfOne Resource
 		for index, ps := range findPss {
 			resource, err := collectProcessResources(ps.Pid)
 			if err != nil {
@@ -94,7 +97,7 @@ func ProcResourceMetrics() (L []*model.MetricValue) {
 			}
 
 			if index == 0 {
-				resourceAllOfOne = resource
+				resourceAllOfOne = *resource
 			} else {
 				resourceAllOfOne.Fd += resource.Fd
 				resourceAllOfOne.CpuUsage += resource.CpuUsage
@@ -102,9 +105,11 @@ func ProcResourceMetrics() (L []*model.MetricValue) {
 			}
 		}
 
-		L = append(L, GaugeValue("process.cpu.busy", resourceAllOfOne.CpuUsage/float64(cpuNum), tags))
-		L = append(L, GaugeValue("process.mem.percent", resourceAllOfOne.MemUsage/float64(memInfo.MemTotal), tags))
-		L = append(L, GaugeValue("process.fd", resourceAllOfOne.Fd, tags))
+		if (Resource{}) != resourceAllOfOne{
+			L = append(L, GaugeValue("process.cpu.busy", resourceAllOfOne.CpuUsage/float64(cpuNum), tags))
+			L = append(L, GaugeValue("process.mem.percent", 100.00 * resourceAllOfOne.MemUsage/float64(memInfo.MemTotal), tags))
+			L = append(L, GaugeValue("process.fd", resourceAllOfOne.Fd, tags))
+		}
 	}
 
 	return
