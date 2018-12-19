@@ -22,6 +22,7 @@ import (
 	"github.com/open-falcon/falcon-plus/modules/alarm/api"
 	"github.com/open-falcon/falcon-plus/modules/alarm/g"
 	"github.com/open-falcon/falcon-plus/modules/alarm/redi"
+	"strings"
 )
 
 func consume(event *cmodel.Event, isHigh bool) {
@@ -84,7 +85,7 @@ func consumeLowEvents(event *cmodel.Event, action *api.Action) {
 }
 
 func ParseUserSms(event *cmodel.Event, action *api.Action) {
-	userMap := api.GetUsers(action.Uic)
+	phones, _, _ := api.ParseTeams(action.Uic)
 
 	content := GenerateSmsContent(event)
 	metric := event.Metric()
@@ -96,29 +97,26 @@ func ParseUserSms(event *cmodel.Event, action *api.Action) {
 	rc := g.RedisConnPool.Get()
 	defer rc.Close()
 
-	for _, user := range userMap {
-		dto := SmsDto{
-			Priority: priority,
-			Metric:   metric,
-			Content:  content,
-			Phone:    user.Phone,
-			Status:   status,
-		}
-		bs, err := json.Marshal(dto)
-		if err != nil {
-			log.Error("json marshal SmsDto fail:", err)
-			continue
-		}
+	dto := SmsDto{
+		Priority: priority,
+		Metric:   metric,
+		Content:  content,
+		Phone:    strings.Join(phones, ","),
+		Status:   status,
+	}
+	bs, err := json.Marshal(dto)
+	if err != nil {
+		log.Error("json marshal SmsDto fail:", err)
+	}
 
-		_, err = rc.Do("LPUSH", queue, string(bs))
-		if err != nil {
-			log.Error("LPUSH redis", queue, "fail:", err, "dto:", string(bs))
-		}
+	_, err = rc.Do("LPUSH", queue, string(bs))
+	if err != nil {
+		log.Error("LPUSH redis", queue, "fail:", err, "dto:", string(bs))
 	}
 }
 
 func ParseUserMail(event *cmodel.Event, action *api.Action) {
-	userMap := api.GetUsers(action.Uic)
+	_, mails, _ := api.ParseTeams(action.Uic)
 
 	metric := event.Metric()
 	subject := GenerateSmsContent(event)
@@ -131,30 +129,27 @@ func ParseUserMail(event *cmodel.Event, action *api.Action) {
 	rc := g.RedisConnPool.Get()
 	defer rc.Close()
 
-	for _, user := range userMap {
-		dto := MailDto{
-			Priority: priority,
-			Metric:   metric,
-			Subject:  subject,
-			Content:  content,
-			Email:    user.Email,
-			Status:   status,
-		}
-		bs, err := json.Marshal(dto)
-		if err != nil {
-			log.Error("json marshal MailDto fail:", err)
-			continue
-		}
+	dto := MailDto{
+		Priority: priority,
+		Metric:   metric,
+		Subject:  subject,
+		Content:  content,
+		Email:    strings.Join(mails, ","),
+		Status:   status,
+	}
+	bs, err := json.Marshal(dto)
+	if err != nil {
+		log.Error("json marshal MailDto fail:", err)
+	}
 
-		_, err = rc.Do("LPUSH", queue, string(bs))
-		if err != nil {
-			log.Error("LPUSH redis", queue, "fail:", err, "dto:", string(bs))
-		}
+	_, err = rc.Do("LPUSH", queue, string(bs))
+	if err != nil {
+		log.Error("LPUSH redis", queue, "fail:", err, "dto:", string(bs))
 	}
 }
 
 func ParseUserIm(event *cmodel.Event, action *api.Action) {
-	userMap := api.GetUsers(action.Uic)
+	_, _, ims := api.ParseTeams(action.Uic)
 
 	content := GenerateIMContent(event)
 	metric := event.Metric()
@@ -166,23 +161,20 @@ func ParseUserIm(event *cmodel.Event, action *api.Action) {
 	rc := g.RedisConnPool.Get()
 	defer rc.Close()
 
-	for _, user := range userMap {
-		dto := ImDto{
-			Priority: priority,
-			Metric:   metric,
-			Content:  content,
-			IM:       user.IM,
-			Status:   status,
-		}
-		bs, err := json.Marshal(dto)
-		if err != nil {
-			log.Error("json marshal ImDto fail:", err)
-			continue
-		}
+	dto := ImDto{
+		Priority: priority,
+		Metric:   metric,
+		Content:  content,
+		IM:       strings.Join(ims, ","),
+		Status:   status,
+	}
+	bs, err := json.Marshal(dto)
+	if err != nil {
+		log.Error("json marshal ImDto fail:", err)
+	}
 
-		_, err = rc.Do("LPUSH", queue, string(bs))
-		if err != nil {
-			log.Error("LPUSH redis", queue, "fail:", err, "dto:", string(bs))
-		}
+	_, err = rc.Do("LPUSH", queue, string(bs))
+	if err != nil {
+		log.Error("LPUSH redis", queue, "fail:", err, "dto:", string(bs))
 	}
 }
