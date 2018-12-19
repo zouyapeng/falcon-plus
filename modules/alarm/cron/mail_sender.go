@@ -15,13 +15,23 @@
 package cron
 
 import (
+	"bytes"
 	log "github.com/Sirupsen/logrus"
 	"github.com/open-falcon/falcon-plus/modules/alarm/g"
 	"github.com/open-falcon/falcon-plus/modules/alarm/model"
 	"github.com/open-falcon/falcon-plus/modules/alarm/redi"
-	"github.com/toolkits/net/httplib"
+	"net/http"
 	"time"
+	"strings"
+	"fmt"
+	"encoding/json"
 )
+
+type EmailMessage struct {
+	Subject string   `json:"subject"`
+	Content string   `json:"content"`
+	Tos     []string `json:"tos"`
+}
 
 func ConsumeMail() {
 	for {
@@ -47,14 +57,27 @@ func SendMail(mail *model.Mail) {
 	}()
 
 	url := g.Config().Api.Mail
-	r := httplib.Post(url).SetTimeout(5*time.Second, 30*time.Second)
-	r.Param("tos", mail.Tos)
-	r.Param("subject", mail.Subject)
-	r.Param("content", mail.Content)
-	resp, err := r.String()
+	var emailMessage EmailMessage
+	emailMessage.Tos = strings.Split(mail.Tos, ",")
+	emailMessage.Content = mail.Content
+	emailMessage.Subject = mail.Subject
+
+	jsonStr, err:= json.Marshal(emailMessage)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	client.Timeout = 10 * time.Second
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Errorf("send mail fail, receiver:%s, subject:%s, content:%s, error:%v", mail.Tos, mail.Subject, mail.Content, err)
 	}
+	defer resp.Body.Close()
 
 	log.Debugf("send mail:%v, resp:%v, url:%s", mail, resp, url)
 }
