@@ -108,8 +108,6 @@ func getCurrentIP() (publicIP string) {
 
 func IWSaaSEIPIsExistMetrics() (L []*model.MetricValue) {
 	reportEipIsExist := g.ReportEipIsExist()
-	log.Println(reportEipIsExist)
-
 	reportCurrentRegionEipIsExist := reportEipIsExist[g.Config().Environment][g.Config().Region]
 
 	if len(reportCurrentRegionEipIsExist) == 0{
