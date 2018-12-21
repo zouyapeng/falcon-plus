@@ -72,6 +72,23 @@ pack: checkbin
 	tar -C out -zcf open-falcon-v$(VERSION).tar.gz .
 	@rm -rf out
 
+pack-agent: checkbin
+	@if [ -e out ] ; then rm -rf out; fi
+	@mkdir out
+	@mkdir -p ./out/agent/bin;
+	@mkdir -p ./out/agent/config;
+	@mkdir -p ./out/agent/logs;
+	@cp ./config/agent.json ./out/agent/config/cfg.json;
+	@cp ./bin/agent/falcon-agent ./out/agent/bin;
+	@cp -r ./modules/agent/public ./out/agent/
+	@(cd ./out && ln -s ./agent/public/ ./public)
+	@(cd ./out && mkdir -p ./agent/plugin && ln -s ./agent/plugin/ ./plugin)
+	@bash ./config/confgen.sh
+	@cp $(TARGET) ./out/$(TARGET)
+	tar -C out -zcf falcon-agent-v$(VERSION).tar.gz .
+	@rm -rf out
+
+
 pack4docker: checkbin
 	@if [ -e out ] ; then rm -rf out; fi
 	@mkdir out
