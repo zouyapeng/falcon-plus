@@ -33,4 +33,5 @@ const (
 	DU_BS            = "du.bs"
 	PROC_NUM         = "proc.num"
 	PROC_RESOURCES   = "process.resources"
+	EIP_IS_EXIST     = "iwsaas.eip.is.exist"
 )

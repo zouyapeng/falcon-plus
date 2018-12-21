@@ -75,6 +75,7 @@ func BuildMappers() {
 			Fs: []func() []*model.MetricValue{
 				IWSaaSBootstrapErrorMetrics,
 				IWSaaSPatchHistoryMetrics,
+				IWSaaSEIPIsExistMetrics,
 			},
 			Interval: interval,
 		},

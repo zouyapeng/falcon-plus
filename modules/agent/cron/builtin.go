@@ -43,6 +43,7 @@ func syncBuiltinMetrics() {
 		var paths = []string{}
 		var procsNum = make(map[string]map[int]string)
 		var procsResource = make(map[string]map[int]string)
+		var eipIsExist = make(map[string]map[string][]string)
 		var urls = make(map[string]string)
 
 		hostname, err := g.Hostname()
@@ -150,13 +151,37 @@ func syncBuiltinMetrics() {
 
 				procsResource[metric.Tags] = tmpMap
 			}
+
+			if metric.Metric == g.EIP_IS_EXIST {
+				arr := strings.Split(metric.Tags, ",")
+				tmpMap := make(map[string][]string)
+				eips := []string{}
+				region := ""
+				env := ""
+
+				for i := 0; i < len(arr); i++ {
+					if strings.HasPrefix(arr[i], "region=") {
+						region = strings.Split(arr[i], "=")[1]
+					} else if strings.HasPrefix(arr[i], "eips=") {
+						string_eips := strings.Split(arr[i], "=")
+						eips = strings.Split(string_eips[1], "|")
+					} else if strings.HasPrefix(arr[i], "env=") {
+						env = strings.Split(arr[i], "=")[1]
+					}
+				}
+				log.Println(region, g.Config().Region, env, g.Config().Environment)
+				if region == g.Config().Region && env == g.Config().Environment{
+					tmpMap[region] = eips
+					eipIsExist[env] = tmpMap
+				}
+			}
 		}
 
 		g.SetReportUrls(urls)
 		g.SetReportPorts(ports)
 		g.SetReportProcs(procsNum)
 		g.SetReportProcsResource(procsResource)
+		g.SetReportEipIsExist(eipIsExist)
 		g.SetDuPaths(paths)
-
 	}
 }

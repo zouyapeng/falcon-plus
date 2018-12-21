@@ -256,9 +256,15 @@ func ParseConfig(cfg string) {
 	}
 
 	lock.Lock()
-	defer lock.Unlock()
-
 	config = &c
+	lock.Unlock()
+
+	config.Region = Region()
+	config.Environment = Environment()
+	config.Role = Role()
+	config.ProductVersion = ProductVersion()
+	config.InstanceID = InstanceID()
+	config.Hostname, _ = Hostname()
 
 	log.Println("read config file:", cfg, "successfully")
 }

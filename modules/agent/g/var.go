@@ -170,6 +170,9 @@ var (
 
 	reportProcsResource     map[string]map[int]string
 	reportProcsResourceLock = new(sync.RWMutex)
+
+	reportEipIsExist map[string]map[string][]string
+	reportEipIsExistLock = new(sync.RWMutex)
 )
 
 func ReportProcs() map[string]map[int]string {
@@ -194,6 +197,18 @@ func SetReportProcsResource(procs map[string]map[int]string) {
 	reportProcsResourceLock.Lock()
 	defer reportProcsResourceLock.Unlock()
 	reportProcsResource = procs
+}
+
+func ReportEipIsExist() map[string]map[string][]string {
+	reportEipIsExistLock.RLock()
+	defer reportEipIsExistLock.RUnlock()
+	return reportEipIsExist
+}
+
+func SetReportEipIsExist(eips map[string]map[string][]string) {
+	reportEipIsExistLock.RLock()
+	defer reportEipIsExistLock.RUnlock()
+	reportEipIsExist = eips
 }
 
 var (
